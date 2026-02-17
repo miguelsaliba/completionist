@@ -1,47 +1,41 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import Map from './components/Map.vue';
+import { useLocationStore } from './stores/LocationStore';
+
+const locationStore = useLocationStore();
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+  <div>
+    <Map />
+    <div class="bottom-bar">
+      <button v-if="!locationStore.isWatching" @click="locationStore.startWatching()">Start</button>
+      <button v-else @click="locationStore.removeWatcher()">Stop</button>
     </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+  </div>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
+button {
+  outline: none;
+  border: 3px solid;
+  cursor: pointer;
+  padding: 1rem 2rem;
+  letter-spacing: 0.05rem;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+.bottom-bar {
+  position: fixed;
+  bottom: 2rem;
+  display: flex;
+  margin: auto;
+  font-size: 17px;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+.current-location {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  background-color: grey;
 }
 </style>
