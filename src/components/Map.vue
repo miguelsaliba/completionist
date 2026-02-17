@@ -1,25 +1,9 @@
-<template>
-  <div id="map" ref="map"></div>
-</template>
-
 <script setup lang="ts">
-import type { Location } from "@capacitor-community/background-geolocation";
-import maplibre, { Marker } from "maplibre-gl";
+import maplibre from "maplibre-gl";
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { onMounted, ref, useTemplateRef, watchEffect } from "vue";
+import { onMounted, useTemplateRef } from "vue";
 
-const { pos } = defineProps<{ pos: Location | null }>()
-
-const marker = ref<Marker | null>(null);
 const mapRef = useTemplateRef('map');
-
-watchEffect(() => {
-  if (pos && marker.value) {
-    const { longitude, latitude } = pos;
-    marker.value.setLngLat([longitude, latitude]).setOpacity('1');
-  }
-}
-);
 
 onMounted(() => {
   if (!mapRef.value) return;
@@ -28,16 +12,17 @@ onMounted(() => {
 
   const map = new maplibre.Map({
     container: mapRef.value,
-    style: `${mapStyle}`,
+    style: mapStyle,
   });
 
-  marker.value = new maplibre.Marker()
-    .setOpacity('0')
-    .setLngLat([0, 0])
-    .addTo(map);
+  map.addControl(new maplibre.GeolocateControl({ trackUserLocation: true }));
 })
 
 </script>
+
+<template>
+  <div id="map" ref="map"></div>
+</template>
 
 <style scoped>
 #map {
