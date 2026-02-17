@@ -7,7 +7,8 @@ const locationStore = useLocationStore();
 
 <template>
   <div>
-    <Map />
+    <!-- Should use a separate way of getting the location -->
+    <Map :pos="locationStore.lastPosition"/>
     <div class="bottom-bar">
       <button v-if="!locationStore.isWatching" @click="locationStore.startWatching()">Start</button>
       <button v-else @click="locationStore.removeWatcher()">Stop</button>
@@ -21,6 +22,7 @@ button {
   border: 3px solid;
   cursor: pointer;
   padding: 1rem 2rem;
+  margin: auto;
   letter-spacing: 0.05rem;
 }
 

@@ -3,12 +3,23 @@
 </template>
 
 <script setup lang="ts">
+import type { Location } from "@capacitor-community/background-geolocation";
 import maplibre, { Marker } from "maplibre-gl";
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { onMounted, ref, useTemplateRef } from "vue";
+import { onMounted, ref, useTemplateRef, watchEffect } from "vue";
+
+const { pos } = defineProps<{ pos: Location | null }>()
 
 const marker = ref<Marker | null>(null);
 const mapRef = useTemplateRef('map');
+
+watchEffect(() => {
+  if (pos && marker.value) {
+    const { longitude, latitude } = pos;
+    marker.value.setLngLat([longitude, latitude]).setOpacity('1');
+  }
+}
+);
 
 onMounted(() => {
   if (!mapRef.value) return;

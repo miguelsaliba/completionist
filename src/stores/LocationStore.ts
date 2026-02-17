@@ -1,4 +1,4 @@
-import type { BackgroundGeolocationPlugin } from '@capacitor-community/background-geolocation';
+import type { BackgroundGeolocationPlugin, Location } from '@capacitor-community/background-geolocation';
 import { registerPlugin } from '@capacitor/core';
 import type { LocalNotificationsPlugin } from '@capacitor/local-notifications';
 import { defineStore } from 'pinia'
@@ -7,7 +7,8 @@ const LocalNotifications = registerPlugin<LocalNotificationsPlugin>("LocalNotifi
 
 export const useLocationStore = defineStore('location', {
   state: () => ({
-    watcherId: null as string | null
+    watcherId: null as string | null,
+    lastPosition: null as Location | null,
   }),
   getters: {
     isWatching: (state) => state.watcherId !== null,
@@ -22,7 +23,7 @@ export const useLocationStore = defineStore('location', {
           stale: false,
           distanceFilter: 1,
         },
-        function callback(location, error) {
+        (location, error) => {
           if (error) {
             if (error.code === "NOT_AUTHORIZED") {
               console.warn("Not authorized");
@@ -37,17 +38,20 @@ export const useLocationStore = defineStore('location', {
             return console.error(error);
           }
 
+          if (!location) return console.error("Location object is null");
+
           LocalNotifications.schedule({
             notifications: [
               {
-                title: `You are at ${location?.latitude}, ${location?.longitude}`,
-                body: `Accuracy is ${location?.accuracy}`,
+                title: `You are at ${location.latitude}, ${location.longitude}`,
+                body: `Accuracy is ${location.accuracy}`,
                 id: 2,
                 ongoing: true,
               }
             ]
           });
 
+          this.lastPosition = location;
           return console.log(location);
         }
       );
