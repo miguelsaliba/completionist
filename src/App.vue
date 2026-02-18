@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import Map from './components/Map.vue';
 import { useLocationStore } from './stores/LocationStore';
+import { useThemeStore } from './stores/ThemeStore';
 
 const locationStore = useLocationStore();
+const themeStore = useThemeStore();
+themeStore.initializeThemeListener();
 </script>
 
 <template>

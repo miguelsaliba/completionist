@@ -1,5 +1,9 @@
 @import 'tailwindcss';
 
+/* Use our .dark class instead of the default one so we can control the theme
+ * based on user preferences */
+@custom-variant dark (&:where(.dark, .dark *));
+
 button {
   cursor: pointer;
 }

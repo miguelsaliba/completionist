@@ -1,22 +1,35 @@
 <script setup lang="ts">
+import { useThemeStore } from "@/stores/ThemeStore";
 import maplibre from "maplibre-gl";
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { onMounted, useTemplateRef } from "vue";
+import { onMounted, useTemplateRef, watch } from "vue";
 
 const mapRef = useTemplateRef('map');
+const themeStore = useThemeStore();
+
+const STYLE_URLS = {
+  light: 'https://tiles.openfreemap.org/styles/liberty',
+  dark: 'https://tiles.openfreemap.org/styles/dark',
+};
 
 onMounted(() => {
   if (!mapRef.value) return;
 
-  const mapStyle = 'https://tiles.openfreemap.org/styles/liberty';
-
   const map = new maplibre.Map({
     container: mapRef.value,
-    style: mapStyle,
+    style: STYLE_URLS[themeStore.value],
   });
 
   map.addControl(new maplibre.GeolocateControl({ trackUserLocation: true }));
   map.addControl(new maplibre.GlobeControl());
+
+  watch(
+    () => themeStore.value,
+    (value) => {
+      const newStyle = STYLE_URLS[value];
+      map.setStyle(newStyle, { diff: true });
+    }
+  );
 })
 
 </script>
