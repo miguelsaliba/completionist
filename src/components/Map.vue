@@ -16,6 +16,7 @@ onMounted(() => {
   });
 
   map.addControl(new maplibre.GeolocateControl({ trackUserLocation: true }));
+  map.addControl(new maplibre.GlobeControl());
 })
 
 </script>
