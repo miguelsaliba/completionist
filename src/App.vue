@@ -11,9 +11,11 @@ const locationStore = useLocationStore();
     <Map :pos="locationStore.lastPosition"/>
     <div class="bottom-bar">
       <button v-if="!locationStore.isWatching" @click="locationStore.startWatching()"
-        class="rounded-full font-semibold border bg-pink-700 border-pink-100 hover:bg-pink-700">Start</button>
+        class="rounded-2xl transition-colors ease-in-out font-semibold text-gray-800 backdrop-blur-sm border-2
+        border-gray-800 bg-gray-600/30 dark:border-white dark:text-white hover:backdrop-invert-10">Start</button>
       <button v-else @click="locationStore.removeWatcher()"
-        class="rounded-full font-semibold border bg-pink-700 border-pink-100 hover:bg-pink-700">Stop</button>
+        class="rounded-2xl transition-colors ease-in-out font-semibold text-gray-800 backdrop-blur-sm border-2
+        border-gray-800 bg-red-600/30 dark:border-white dark:text-white hover:backdrop-invert-10">Stop</button>
     </div>
   </div>
 </template>
@@ -21,7 +23,6 @@ const locationStore = useLocationStore();
 <style scoped>
 button {
   outline: none;
-  cursor: pointer;
   padding: 1rem 2rem;
   margin: auto;
   letter-spacing: 0.05rem;
