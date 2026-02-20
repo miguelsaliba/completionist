@@ -2,10 +2,12 @@
 import { useThemeStore } from "@/stores/ThemeStore";
 import maplibre from "maplibre-gl";
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { storeToRefs } from "pinia";
 import { onMounted, useTemplateRef, watch } from "vue";
 
 const mapRef = useTemplateRef('map');
 const themeStore = useThemeStore();
+const { theme } = storeToRefs(themeStore);
 
 const STYLE_URLS = {
   light: 'https://tiles.openfreemap.org/styles/liberty',
@@ -17,14 +19,13 @@ onMounted(() => {
 
   const map = new maplibre.Map({
     container: mapRef.value,
-    style: STYLE_URLS[themeStore.value],
+    style: STYLE_URLS[theme.value],
   });
 
   map.addControl(new maplibre.GeolocateControl({ trackUserLocation: true }));
   map.addControl(new maplibre.GlobeControl());
 
-  watch(
-    () => themeStore.value,
+  watch(theme,
     (value) => {
       const newStyle = STYLE_URLS[value];
       map.setStyle(newStyle, { diff: true });

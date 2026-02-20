@@ -7,7 +7,7 @@ export enum Theme {
 }
 
 export interface ThemeSetting {
-  value: Theme;
+  theme: Theme;
   system: boolean;
 }
 
@@ -21,7 +21,7 @@ const STORAGE_KEY = 'color-theme';
 
 const getStoredTheme = (): ThemeSetting => {
   if (typeof window === 'undefined') {
-    return { value: Theme.DARK, system: false };
+    return { theme: Theme.DARK, system: false };
   }
 
   try {
@@ -36,28 +36,28 @@ const getStoredTheme = (): ThemeSetting => {
     console.error('Failed to parse stored theme:', e);
   }
 
-  return { value: getDefaultTheme(), system: true };
+  return { theme: getDefaultTheme(), system: true };
 };
 
 export const useThemeStore = defineStore('theme', () => {
   const themeSetting = ref<ThemeSetting>(getStoredTheme());
 
-  const value = computed(() => themeSetting.value.value);
-  const isDark = computed(() => value.value === Theme.DARK);
+  const theme = computed(() => themeSetting.value.theme);
+  const isDark = computed(() => theme.value === Theme.DARK);
   const isSystem = computed(() => themeSetting.value.system);
 
   const applyTheme = (theme: ThemeSetting) => {
     themeSetting.value = theme;
 
-    document.documentElement.classList.toggle('dark', theme.value === Theme.DARK);
+    document.documentElement.classList.toggle('dark', theme.theme === Theme.DARK);
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(theme));
   };
 
   const update = (value: Theme | 'system') => {
     const theme: ThemeSetting = value === 'system'
-      ? { system: true, value: getDefaultTheme() }
-      : { system: false, value };
+      ? { system: true, theme: getDefaultTheme() }
+      : { system: false, theme: value };
 
     applyTheme(theme);
   };
@@ -71,7 +71,7 @@ export const useThemeStore = defineStore('theme', () => {
   };
 
   const toggleTheme = () => {
-    update(value.value === Theme.DARK ? Theme.LIGHT : Theme.DARK);
+    update(theme.value === Theme.DARK ? Theme.LIGHT : Theme.DARK);
   };
 
   const initializeThemeListener = () => {
@@ -99,7 +99,7 @@ export const useThemeStore = defineStore('theme', () => {
     themeSetting,
 
     // Computed
-    value,
+    theme,
     isDark,
     isSystem,
 
