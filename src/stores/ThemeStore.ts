@@ -51,6 +51,7 @@ export const useThemeStore = defineStore('theme', () => {
 
     document.documentElement.classList.toggle('dark', theme.theme === Theme.DARK);
 
+    // TODO: Change this to use the capacitor storage
     localStorage.setItem(STORAGE_KEY, JSON.stringify(theme));
   };
 

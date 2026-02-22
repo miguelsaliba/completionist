@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { databaseService } from "@/services/database";
+import { generateGeojson } from "@/services/geojson";
 import { useThemeStore } from "@/stores/ThemeStore";
 import maplibre from "maplibre-gl";
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -9,17 +11,17 @@ const mapRef = useTemplateRef('map');
 const themeStore = useThemeStore();
 const { theme } = storeToRefs(themeStore);
 
-const STYLE_URLS = {
+const styleUrls = {
   light: 'https://tiles.openfreemap.org/styles/liberty',
   dark: 'https://tiles.openfreemap.org/styles/dark',
 };
 
-onMounted(() => {
+onMounted(async () => {
   if (!mapRef.value) return;
 
   const map = new maplibre.Map({
     container: mapRef.value,
-    style: STYLE_URLS[theme.value],
+    style: styleUrls[theme.value] ?? styleUrls.dark,
   });
 
   map.addControl(new maplibre.GeolocateControl({ trackUserLocation: true }));
@@ -27,10 +29,26 @@ onMounted(() => {
 
   watch(theme,
     (value) => {
-      const newStyle = STYLE_URLS[value];
+      const newStyle = styleUrls[value] ?? styleUrls.dark;
       map.setStyle(newStyle, { diff: true });
     }
   );
+
+  await databaseService.init();
+  const geojsonData = await generateGeojson();
+  console.log(geojsonData);
+  map.addSource('location', { type: 'geojson', data: geojsonData });
+  map.addLayer({
+    id: 'track-lines',
+    type: 'line',
+    source: 'location',
+    filter: ['==', '$type', 'LineString'],
+    paint: {
+      'line-color': '#ff6b6b',
+      'line-width': 3,
+      'line-opacity': 0.7,
+    },
+  });
 })
 
 </script>
