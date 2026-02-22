@@ -1,27 +1,29 @@
+import { databaseService } from '@/services/database';
 import type { BackgroundGeolocationPlugin, Location } from '@capacitor-community/background-geolocation';
 import { registerPlugin } from '@capacitor/core';
-import type { LocalNotificationsPlugin } from '@capacitor/local-notifications';
 import { defineStore } from 'pinia'
 const BackgroundGeolocation = registerPlugin<BackgroundGeolocationPlugin>("BackgroundGeolocation");
-const LocalNotifications = registerPlugin<LocalNotificationsPlugin>("LocalNotifications")
 
 export const useLocationStore = defineStore('location', {
   state: () => ({
     watcherId: null as string | null,
+    sessionId: null as number | null,
     lastPosition: null as Location | null,
+    sessionLocations: [] as Location[]
   }),
   getters: {
     isWatching: (state) => state.watcherId !== null,
   },
   actions: {
     async startWatching() {
+      this.sessionId = new Date().getUTCSeconds();
       this.watcherId = await BackgroundGeolocation.addWatcher(
         {
-          backgroundMessage: "Cancel to prevent battery drain.",
-          backgroundTitle: "Tracking You.",
+          backgroundTitle: "Location Tracking Active",
+          backgroundMessage: "Tap to open app",
           requestPermissions: true,
           stale: false,
-          distanceFilter: 1,
+          distanceFilter: 1, // TODO: increase
         },
         (location, error) => {
           if (error) {
@@ -39,28 +41,24 @@ export const useLocationStore = defineStore('location', {
           }
 
           if (!location) return console.error("Location object is null");
-
-          LocalNotifications.schedule({
-            notifications: [
-              {
-                title: `You are at ${location.latitude}, ${location.longitude}`,
-                body: `Accuracy is ${location.accuracy}`,
-                id: 2,
-                ongoing: true,
-              }
-            ]
-          });
+          if (!this.sessionId) return console.error("Session ID is null"); // Should be impossible
 
           this.lastPosition = location;
+          this.sessionLocations.push(location);
+          databaseService.insertLocationPoint({ ...location, sessionId: this.sessionId });
           return console.log(location);
         }
       );
     },
-    removeWatcher() {
+    async stopWatching() {
       if (this.watcherId === null) return;
 
-      BackgroundGeolocation.removeWatcher({ id: this.watcherId });
-      this.watcherId = null;
+      BackgroundGeolocation.removeWatcher({ id: this.watcherId })
+        .finally(() => {
+          this.watcherId = null;
+          this.sessionId = null;
+          this.sessionLocations = [];
+        });
     }
   },
 })
