@@ -16,7 +16,7 @@ export const useLocationStore = defineStore('location', {
   },
   actions: {
     async startWatching() {
-      this.sessionId = new Date().getUTCSeconds();
+      this.sessionId = Math.floor(Date.now() / 1000);
       this.watcherId = await BackgroundGeolocation.addWatcher(
         {
           backgroundTitle: "Location Tracking Active",

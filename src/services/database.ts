@@ -49,9 +49,9 @@ class DatabaseService {
         accuracy REAL,
         altitude REAL,
         timestamp INTEGER NOT NULL,
-        session_id INTEGER NOT NULL
+        sessionId INTEGER NOT NULL
       );
-      CREATE INDEX IF NOT EXISTS idx_session ON location_points(session_id);
+      CREATE INDEX IF NOT EXISTS idx_session ON location_points(sessionId);
       CREATE INDEX IF NOT EXISTS idx_timestamp ON location_points(timestamp);
     `;
     await this.db?.execute(sql);
@@ -63,7 +63,7 @@ class DatabaseService {
 
     const sql = `
       INSERT INTO location_points
-      (latitude, longitude, accuracy, altitude, timestamp, session_id)
+      (latitude, longitude, accuracy, altitude, timestamp, sessionId)
       VALUES (?, ?, ?, ?, ?, ?)
     `;
     await this.db.run(sql, [
@@ -77,12 +77,12 @@ class DatabaseService {
   }
 
   /** @throws {DatabaseError} */
-  async getSessionPoints(session_id: number): Promise<LocationRow[]> {
+  async getSessionPoints(sessionId: number): Promise<LocationRow[]> {
     if (!this.db) throw new DatabaseError("DB not initialized.");
 
     const result = await this.db.query(
-      'SELECT * FROM location_points WHERE session_id = ? ORDER BY timestamp ASC',
-      [session_id]
+      'SELECT * FROM location_points WHERE sessionId = ? ORDER BY timestamp ASC',
+      [sessionId]
     );
     return result.values || [];
   }
@@ -100,7 +100,7 @@ class DatabaseService {
     if (!this.db) throw new DatabaseError("DB not initialized.");
 
     const result = await this.db.query(
-      'SELECT DISTINCT session_id FROM location_points ORDER BY timestamp DESC'
+      'SELECT DISTINCT sessionId FROM location_points ORDER BY timestamp DESC'
     );
     return result.values || [];
   }
