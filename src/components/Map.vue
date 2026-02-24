@@ -34,9 +34,9 @@ onMounted(async () => {
     }
   );
 
+  // TODO: This is ok for now but definitely needs to be handled differently at some point
   await databaseService.init();
   const geojsonData = await generateGeojson();
-  console.log(geojsonData);
   map.addSource('location', { type: 'geojson', data: geojsonData });
   map.addLayer({
     id: 'track-lines',
