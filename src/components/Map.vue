@@ -54,15 +54,13 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div id="map" ref="map"></div>
+  <div id="map" ref="map" class="w-full h-lvh absolute inset-0"></div>
 </template>
 
-<style scoped>
-#map {
-  width: 100%;
-  height: 100vh;
-  position: absolute;
-  top: 0;
-  left: 0;
+<style>
+@media (max-width: 767px) {
+  .maplibregl-ctrl-top-right {
+    top: 2rem;
+  }
 }
 </style>
