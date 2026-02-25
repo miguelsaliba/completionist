@@ -26,7 +26,7 @@ export const useLocationStore = defineStore('location', {
           backgroundMessage: "Tap to open app",
           requestPermissions: true,
           stale: false,
-          distanceFilter: 1, // TODO: increase
+          distanceFilter: 10,
         },
         (location, error) => {
           if (error) {
