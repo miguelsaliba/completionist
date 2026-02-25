@@ -7,3 +7,12 @@
 button {
   cursor: pointer;
 }
+
+@media (max-width: 767px) {
+  .maplibregl-control-container {
+    .maplibregl-ctrl-top-right,
+    .maplibregl-ctrl-top-left {
+      top: 2rem;
+    }
+  }
+}
