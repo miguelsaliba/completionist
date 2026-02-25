@@ -1,6 +1,7 @@
 import { databaseService } from '@/services/database';
 import type { BackgroundGeolocationPlugin, Location } from '@capacitor-community/background-geolocation';
 import { registerPlugin } from '@capacitor/core';
+import { LocalNotifications } from '@capacitor/local-notifications';
 import { defineStore } from 'pinia'
 const BackgroundGeolocation = registerPlugin<BackgroundGeolocationPlugin>("BackgroundGeolocation");
 
@@ -9,13 +10,15 @@ export const useLocationStore = defineStore('location', {
     watcherId: null as string | null,
     sessionId: null as number | null,
     lastPosition: null as Location | null,
-    sessionLocations: [] as Location[]
+    sessionPoints: [] as Location[]
   }),
   getters: {
     isWatching: (state) => state.watcherId !== null,
   },
   actions: {
     async startWatching() {
+      await requestNotificationPermission();
+
       this.sessionId = Math.floor(Date.now() / 1000);
       this.watcherId = await BackgroundGeolocation.addWatcher(
         {
@@ -44,7 +47,7 @@ export const useLocationStore = defineStore('location', {
           if (!this.sessionId) return console.error("Session ID is null"); // Should be impossible
 
           this.lastPosition = location;
-          this.sessionLocations.push(location);
+          this.sessionPoints.push(location);
           databaseService.insertLocationPoint({ ...location, sessionId: this.sessionId });
           return console.log(location);
         }
@@ -57,8 +60,21 @@ export const useLocationStore = defineStore('location', {
         .finally(() => {
           this.watcherId = null;
           this.sessionId = null;
-          this.sessionLocations = [];
+          this.sessionPoints = [];
         });
     }
   },
 })
+
+/**
+ * Android requires location permission in order to keep location tracking active
+ * TODO: make android only
+ */
+async function requestNotificationPermission(): Promise<boolean> {
+  let permission = await LocalNotifications.checkPermissions();
+  if (permission.display.startsWith('prompt')) {
+    permission = await LocalNotifications.requestPermissions();
+  }
+
+  return permission.display == 'granted';
+}
