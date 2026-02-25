@@ -1,5 +1,9 @@
 #!/bin/bash
 
+set -a
+source android/.env
+set +a
+
 PASSWORD=$(secret-tool lookup app android-key key-name password)
 
 if [ -z "$PASSWORD" ]; then
@@ -8,9 +12,10 @@ if [ -z "$PASSWORD" ]; then
 fi
 
 npm run build
-npx cap sync
+npx cap sync android
 npx cap build android --keystorepath upload-keystore.jks \
                       --keystorepass "$PASSWORD" \
                       --keystorealiaspass "$PASSWORD" \
                       --keystorealias upload \
+                      --signing-type apksigner \
                       --androidreleasetype APK
