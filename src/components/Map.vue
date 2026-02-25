@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { databaseService } from "@/services/database";
-import { generateGeojson } from "@/services/geojson";
+import { generateGeojson, generateGeojsonDiff } from "@/services/geojson";
+import { useLocationStore } from "@/stores/LocationStore";
 import { useThemeStore } from "@/stores/ThemeStore";
-import maplibre from "maplibre-gl";
+import maplibre, { GeoJSONSource } from "maplibre-gl";
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { storeToRefs } from "pinia";
 import { onMounted, useTemplateRef, watch } from "vue";
 
 const mapRef = useTemplateRef('map');
 const themeStore = useThemeStore();
+const locationStore = useLocationStore();
 const { theme } = storeToRefs(themeStore);
 
 const styleUrls = {
@@ -42,13 +44,22 @@ onMounted(async () => {
     id: 'track-lines',
     type: 'line',
     source: 'location',
-    filter: ['==', '$type', 'LineString'],
     paint: {
       'line-color': '#ff6b6b',
       'line-width': 3,
       'line-opacity': 0.7,
     },
   });
+
+  watch(() => locationStore.sessionPoints.length,
+    async () => {
+      if (!locationStore.sessionId || !locationStore.sessionPoints.length) return;
+      const diff = generateGeojsonDiff(locationStore.sessionPoints, locationStore.sessionId);
+      const source = map.getSource('location');
+      if (!(source instanceof GeoJSONSource) || !diff) return;
+      await source.updateData(diff, true);
+    }
+  );
 })
 
 </script>
