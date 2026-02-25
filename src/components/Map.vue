@@ -67,11 +67,3 @@ onMounted(async () => {
 <template>
   <div id="map" ref="map" class="w-full h-lvh absolute inset-0"></div>
 </template>
-
-<style>
-@media (max-width: 767px) {
-  .maplibregl-ctrl-top-right {
-    top: 2rem;
-  }
-}
-</style>
