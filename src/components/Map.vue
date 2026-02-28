@@ -50,6 +50,11 @@ onMounted(async () => {
       'line-opacity': 0.7,
     },
   });
+  map.addLayer({
+    'id': 'location-heat',
+    'type': 'heatmap',
+    'source': 'location',
+  });
 
   watch(() => locationStore.sessionPoints.length,
     async () => {
