@@ -27,6 +27,11 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Setup Android build-tools
+        run: |
+          $ANDROID_HOME/cmdline-tools/16.0/bin/sdkmanager "build-tools;35.0.0"
+          echo "$ANDROID_HOME/build-tools/35.0.0" >> "$GITHUB_PATH"
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
