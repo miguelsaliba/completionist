@@ -32,18 +32,39 @@ onMounted(async () => {
   watch(theme,
     (value) => {
       const newStyle = styleUrls[value] ?? styleUrls.dark;
-      map.setStyle(newStyle, { diff: true });
+      map.setStyle(newStyle, {
+        diff: true,
+        transformStyle: (previousStyle, nextStyle) => {
+          if (!previousStyle) return nextStyle;
+          // Stolen from https://github.com/maplibre/maplibre-gl-js/issues/2587#issuecomment-1997263712
+          const customLayers = previousStyle.layers.filter((l) => l.id.startsWith('completionist-'));
+          const layers = nextStyle.layers.concat(customLayers);
+
+          const sources = nextStyle.sources;
+          for (const [key, value] of Object.entries(previousStyle.sources || {})) {
+            if (key.startsWith('completionist-')) {
+              sources[key] = value;
+            }
+          }
+
+          return {
+            ...nextStyle,
+            sources,
+            layers,
+          };
+        },
+      });
     }
   );
 
   // TODO: This is ok for now but definitely needs to be handled differently at some point
   await databaseService.init();
   const geojsonData = await generateGeojson();
-  map.addSource('location', { type: 'geojson', data: geojsonData });
+  map.addSource('completionist-location', { type: 'geojson', data: geojsonData });
   map.addLayer({
-    id: 'track-lines',
+    id: 'completionist-lines',
     type: 'line',
-    source: 'location',
+    source: 'completionist-location',
     paint: {
       'line-color': '#ff6b6b',
       'line-width': 3,
@@ -51,16 +72,16 @@ onMounted(async () => {
     },
   });
   map.addLayer({
-    'id': 'location-heat',
+    'id': 'completionist-heatmap',
     'type': 'heatmap',
-    'source': 'location',
+    'source': 'completionist-location',
   });
 
   watch(() => locationStore.sessionPoints.length,
     async () => {
       if (!locationStore.sessionId || !locationStore.sessionPoints.length) return;
       const diff = generateGeojsonDiff(locationStore.sessionPoints, locationStore.sessionId);
-      const source = map.getSource('location');
+      const source = map.getSource('completionist-location');
       if (!(source instanceof GeoJSONSource) || !diff) return;
       await source.updateData(diff, true);
     }
